@@ -1,14 +1,15 @@
 import React from 'react';   // استيراد React
-import Header from './components/Header';        // استيراد Header
-import MainContent from './components/MainContent';  // استيراد MainContent
-import Footer from './components/Footer';        // استيراد Footer
+import UserProfile from './components/UserProfile';
 
 function App() {
   return (
     <div>
-      <Header />       {/* يعرض العنوان */}
-      <MainContent />  {/* يعرض المحتوى */}
-      <Footer />       {/* يعرض الفوتر */}
+
+       <UserProfile 
+       name="Alice" 
+       age="25" 
+       bio="Loves hiking and photography" />       {/* يعرض الفوتر */}
+
     </div>
   );
 }
