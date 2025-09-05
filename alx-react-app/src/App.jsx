@@ -1,17 +1,16 @@
-// src/App.jsx
+import React from 'react';   // استيراد React
+import Header from './components/Header';        // استيراد Header
+import MainContent from './components/MainContent';  // استيراد MainContent
+import Footer from './components/Footer';        // استيراد Footer
 
-import React from 'react';                            // استيراد React (للوضوح)
-import './App.css';                                   // استيراد ملف التنسيقات لو موجود
-import WelcomeMessage from './components/WelcomeMessage'; // استيراد المكوّن اللي عملناه
-// import Header from './components/Header'; // استيراد المكوّن اللي عملناه
-
-function App() {                                      // تعريف المكوّن الرئيسي App
+function App() {
   return (
-    <div>                                             {/* غلاف التطبيق */}
-      <h1>تطبيقي الأول</h1>                            {/* ممكن تغير العنوان براحتك */}
-      <WelcomeMessage />                              {/* هنا نعرض المكوّن المستورد */}
+    <div>
+      <Header />       {/* يعرض العنوان */}
+      <MainContent />  {/* يعرض المحتوى */}
+      <Footer />       {/* يعرض الفوتر */}
     </div>
   );
 }
 
-export default App;                                   // تصدير App عشان main.jsx يرندرها
+export default App;
