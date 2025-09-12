@@ -1,15 +1,14 @@
-import { useContext } from "react";
+import UserProfile from "./UserProfile";
 import UserContext from "./UserContext";
 
-function UserProfile() {
-  const userData = useContext(UserContext);
+function App() {
+  const userData = { name: "Jane Doe", email: "jane.doe@example.com" };
 
   return (
-    <div>
-      <p>Name: {userData.name}</p>
-      <p>Email: {userData.email}</p>
-    </div>
+    <UserContext.Provider value={userData}>
+      <UserProfile />
+    </UserContext.Provider>
   );
 }
 
-export default UserProfile;
+export default App;
