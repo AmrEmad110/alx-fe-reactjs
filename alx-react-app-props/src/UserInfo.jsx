@@ -1,7 +1,7 @@
-import UserProfile from './UserProfile';   // ✅ بدل UserDetails
+import UserDetails from "./UserDetails";
 
 function UserInfo() {
-  return <UserProfile />;  // ✅ بدل <UserDetails />
+  return <UserDetails />;
 }
 
 export default UserInfo;
