@@ -1,18 +1,26 @@
-// src/store/recipeStore.js
+import create from 'zustand';
 
-import create from 'zustand';              // نستورد create عشان نعمل ال store
-
-// ننشئ ال store ونسميه useRecipeStore
 const useRecipeStore = create((set) => ({
-  recipes: [],                            // الحالة الابتدائية: مصفوفة وصفات فارغة
+  recipes: [],
 
-  // دالة لإضافة وصفة جديدة
-  addRecipe: (newRecipe) => 
+  // إضافة وصفة جديدة
+  addRecipe: (newRecipe) =>
     set((state) => ({ recipes: [...state.recipes, newRecipe] })),
 
-  // دالة لتهيئة أو تعيين قائمة الوصفات من مصدر خارجي
-  setRecipes: (recipes) => set({ recipes })
+  // حذف وصفة حسب id
+  deleteRecipe: (id) =>
+    set((state) => ({ recipes: state.recipes.filter(r => r.id !== id) })),
+
+  // تحديث وصفة: تمرر id و partial update أو كامل الكائن
+  updateRecipe: (id, updatedFields) =>
+    set((state) => ({
+      recipes: state.recipes.map(r =>
+        r.id === id ? { ...r, ...updatedFields } : r
+      )
+    })),
+
+  // تهيئة كامل قائمة الوصفات (مثلاً جلب من API)
+  setRecipes: (recipes) => set({ recipes }),
 }));
 
-export default useRecipeStore;             // نصدر ال hook عشان نستخدمه في المكونات
-export { useRecipeStore };                 // نصدره أيضًا كـ named export لتجنب أخطاء الاستيراد
+export default useRecipeStore;
