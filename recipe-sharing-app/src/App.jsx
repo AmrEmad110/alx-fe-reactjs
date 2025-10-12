@@ -1,12 +1,12 @@
-// src/App.jsx
-import RecipeList from './components/RecipeList';
 import AddRecipeForm from './components/AddRecipeForm';
+import RecipeList from './components/RecipeList';
 
 function App() {
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Recipe Sharing App</h1>
+    <div className="container">
+      <h1>🍲 Recipe Sharing App</h1>
       <AddRecipeForm />
+      <hr />
       <RecipeList />
     </div>
   );

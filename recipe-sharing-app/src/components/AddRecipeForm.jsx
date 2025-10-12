@@ -1,22 +1,21 @@
-// src/components/AddRecipeForm.jsx
 import { useState } from 'react';
-import useRecipeStore from '../store/recipeStore'; // أو: import { useRecipeStore } from '../store/recipeStore';
+import { useRecipeStore } from '../store/recipeStore';
 
 const AddRecipeForm = () => {
-  const [title, setTitle] = useState('');          // حالة محلية لحقل العنوان
-  const [description, setDescription] = useState(''); // حالة محلية لحقل الوصف
-
-  const addRecipe = useRecipeStore(state => state.addRecipe); // نجيب دالة addRecipe من ال store
+  const addRecipe = useRecipeStore((s) => s.addRecipe);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
 
   const handleSubmit = (e) => {
-    e.preventDefault();                             // نمنع إعادة تحميل الصفحة
-    if (!title.trim()) return;                      // (اختياري) تحقق بسيط: لا تضيف عنوان فاضي
-    addRecipe({ id: Date.now(), title, description });
-    setTitle(''); setDescription('');               // نفضي الحقول بعد الإضافة
-  }
+    e.preventDefault();
+    if (!title.trim()) return alert('Please enter a title');
+    addRecipe({ id: Date.now(), title: title.trim(), description: description.trim() });
+    setTitle('');
+    setDescription('');
+  };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="add-recipe-form">
       <input
         type="text"
         value={title}
@@ -31,6 +30,6 @@ const AddRecipeForm = () => {
       <button type="submit">Add Recipe</button>
     </form>
   );
-}
+};
 
 export default AddRecipeForm;

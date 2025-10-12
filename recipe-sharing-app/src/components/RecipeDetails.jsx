@@ -1,31 +1,25 @@
-// src/components/RecipeDetails.jsx
-import { useParams, useNavigate } from 'react-router-dom';
-import useRecipeStore from '../store/recipeStore';
-import DeleteRecipeButton from './DeleteRecipeButton';
+import { useParams } from 'react-router-dom';
+import { useRecipeStore } from '../store/recipeStore';
 import EditRecipeForm from './EditRecipeForm';
+import DeleteRecipeButton from './DeleteRecipeButton';
 
 const RecipeDetails = () => {
-  const { id } = useParams(); // يقرأ :id من رابط الصفحة
-  const navigate = useNavigate();
-  const recipe = useRecipeStore(state =>
-    state.recipes.find(r => String(r.id) === String(id))
-  );
+  const { id } = useParams();
+  const recipeId = Number(id);
+  const recipe = useRecipeStore((s) => s.recipes.find((r) => r.id === recipeId));
 
   if (!recipe) return <p>Recipe not found.</p>;
 
   return (
-    <div>
+    <div className="recipe-details">
       <h1>{recipe.title}</h1>
       <p>{recipe.description}</p>
 
-      {/* زر يذهب لنموذج التعديل (لو استخدمت صفحة منفصلة) */}
-      <button onClick={() => navigate(`/recipes/${id}/edit`)}>Edit</button>
+      <h3>Edit this recipe</h3>
+      <EditRecipeForm recipe={recipe} />
 
-      {/* زر الحذف (مكوّن منفصل) */}
+      <h3>Danger zone</h3>
       <DeleteRecipeButton id={recipe.id} />
-
-      {/* أو تضمين نموذج التعديل مباشرة هنا */}
-      {/* <EditRecipeForm recipe={recipe} /> */}
     </div>
   );
 };
