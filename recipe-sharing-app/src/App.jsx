@@ -1,29 +1,26 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import SearchBar from "./components/SearchBar";
-import RecipeList from "./components/RecipeList";
+// داخل App.jsx
+import { useParams } from "react-router-dom";
+import { useRecipeStore } from "./recipeStore";
 
-const Home = () => (
-  <div>
-    <h1>Recipe Sharing App</h1>
-    <SearchBar />
-    <RecipeList />
-  </div>
-);
+function RecipeDetail() {
+  const { id } = useParams();
+  const recipes = useRecipeStore(state => state.recipes);
+  const recipe = recipes.find(r => String(r.id) === id);
 
-const About = () => <h1>About Page</h1>;
+  if (!recipe) return <h2>Recipe not found</h2>;
 
-export default function App() {
   return (
-    <Router>
-      <nav style={{ marginBottom: "20px" }}>
-        <Link to="/">Home</Link> | <Link to="/about">About</Link>
-      </nav>
-
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-      </Routes>
-    </Router>
+    <div>
+      <h2>{recipe.title}</h2>
+      <p><strong>Time:</strong> {recipe.time} mins</p>
+      <p><strong>Ingredients:</strong> {recipe.ingredients.join(", ")}</p>
+    </div>
   );
 }
+
+// في الـ Routes
+<Routes>
+  <Route path="/" element={<Home />} />
+  <Route path="/about" element={<About />} />
+  <Route path="/recipes/:id" element={<RecipeDetail />} /> {/* ✅ جديد */}
+</Routes>

@@ -1,5 +1,7 @@
+// src/components/RecipeList.jsx
 import React from 'react';
 import { useRecipeStore } from '../recipeStore';
+import { Link } from 'react-router-dom'; // ✅ المطلوب
 
 export default function RecipeList() {
   const filteredRecipes = useRecipeStore(state => state.filteredRecipes);
@@ -13,7 +15,10 @@ export default function RecipeList() {
       <ul>
         {displayRecipes.map(recipe => (
           <li key={recipe.id}>
-            <strong>{recipe.title}</strong> - {recipe.time} mins
+            {/* ✅ استخدم Link لعرض تفاصيل الوصفة */}
+            <Link to={`/recipes/${recipe.id}`}>
+              <strong>{recipe.title}</strong> - {recipe.time} mins
+            </Link>
           </li>
         ))}
       </ul>
