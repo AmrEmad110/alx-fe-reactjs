@@ -1,69 +1,144 @@
 // src/recipeStore.js
 import create from 'zustand';
 
-// مثال بسيط لبيانات وصفة
-// { id: '1', title: 'Shakshuka', ingredients: ['eggs','tomato'], prepTime: 20, instructions: '...' }
+// نموذج وصفة:
+// {
+//   id: '1',
+//   title: 'Shakshuka',
+//   ingredients: ['eggs','tomato','onion'],
+//   prepTime: 20,
+//   instructions: '...'
+// }
 
 export const useRecipeStore = create((set, get) => ({
+  // بيانات الوصفات الأساسية
   recipes: [
     { id: '1', title: 'Shakshuka', ingredients: ['eggs', 'tomato', 'onion'], prepTime: 25, instructions: 'Cook tomatoes...' },
     { id: '2', title: 'Pasta Carbonara', ingredients: ['pasta', 'egg', 'cheese', 'bacon'], prepTime: 30, instructions: 'Boil pasta...' },
-    { id: '3', title: 'Tomato Soup', ingredients: ['tomato', 'onion', 'garlic'], prepTime: 15, instructions: 'Simmer tomatoes...' }
+    { id: '3', title: 'Tomato Soup', ingredients: ['tomato', 'onion', 'garlic'], prepTime: 15, instructions: 'Simmer tomatoes...' },
+    { id: '4', title: 'Egg Fried Rice', ingredients: ['rice','egg','soy sauce'], prepTime: 20, instructions: 'Fry rice...' }
   ],
 
-  // حالات البحث والفلاتر
+  // بحث وفلاتر (منطق سابق)
   searchTerm: '',
   ingredientFilter: '',
-  maxPrepTime: null, // number or null
-
-  // مصفوفة نتائج مفلترة تكون محدثة عند تغيير الفلاتر
+  maxPrepTime: null,
   filteredRecipes: [],
 
-  // Setters
+  // مفضلات المستخدم (تخزين ids)
+  favorites: [],
+
+  // توصيات محسوبة
+  recommendations: [],
+
+  // ---------- setters / actions ----------
   setRecipes: (recipes) => set({ recipes }),
-  addRecipe: (recipe) => set(state => ({ recipes: [...state.recipes, recipe] })),
+
+  // Favorites actions
+  addFavorite: (recipeId) => {
+    set(state => {
+      if (state.favorites.includes(recipeId)) return {}; // موجود بالفعل
+      const next = [...state.favorites, recipeId];
+      return { favorites: next };
+    });
+    // بعد تعديل المفضلات يمكن إعادة توليد التوصيات تلقائيًا
+    get().generateRecommendations();
+  },
+
+  removeFavorite: (recipeId) => {
+    set(state => ({ favorites: state.favorites.filter(id => id !== recipeId) }));
+    get().generateRecommendations();
+  },
+
+  toggleFavorite: (recipeId) => {
+    const state = get();
+    if (state.favorites.includes(recipeId)) {
+      get().removeFavorite(recipeId);
+    } else {
+      get().addFavorite(recipeId);
+    }
+  },
+
+  // Get favorites as full recipe objects (selector مفيد للمكوّنات)
+  getFavoriteRecipes: () => {
+    const { recipes, favorites } = get();
+    return favorites.map(id => recipes.find(r => String(r.id) === String(id))).filter(Boolean);
+  },
+
+  // ---------- filtering logic (كما قبل) ----------
   setSearchTerm: (term) => {
     set({ searchTerm: term });
-    // trigger filtering after updating searchTerm
-    const state = get();
-    const filtered = _computeFiltered(state);
+    const filtered = _computeFiltered(get());
     set({ filteredRecipes: filtered });
   },
+
   setIngredientFilter: (ing) => {
     set({ ingredientFilter: ing });
-    const state = get();
-    const filtered = _computeFiltered(state);
+    const filtered = _computeFiltered(get());
     set({ filteredRecipes: filtered });
   },
+
   setMaxPrepTime: (minutes) => {
     const val = minutes === '' || minutes == null ? null : Number(minutes);
     set({ maxPrepTime: val });
-    const state = get();
-    const filtered = _computeFiltered(state);
+    const filtered = _computeFiltered(get());
     set({ filteredRecipes: filtered });
   },
+
   clearFilters: () => {
     set({ searchTerm: '', ingredientFilter: '', maxPrepTime: null });
-    const state = get();
-    const filtered = _computeFiltered(state);
-    set({ filteredRecipes: filtered });
+    set({ filteredRecipes: get().recipes });
   },
 
-  // دالة عامة لتشغيل الفلترة يدوياً (مفيدة لو تريد تفعلها عبر زر)
   filterRecipes: () => {
-    const state = get();
-    const filtered = _computeFiltered(state);
+    const filtered = _computeFiltered(get());
     set({ filteredRecipes: filtered });
   },
 
-  // تهيئة: عند التحميل نضع filteredRecipes = recipes (حتى لو لم تقم بفلترة)
   initFiltered: () => {
+    set({ filteredRecipes: get().recipes });
+  },
+
+  // ---------- Recommendations logic ----------
+  // بسيط: نحسب تشابه حسب عدد المكونات المشتركة بين وصفة غير مفضلة ومجموعة المفضلات
+  generateRecommendations: () => {
     const state = get();
-    set({ filteredRecipes: state.recipes });
+    const favorites = state.favorites;
+    if (!favorites || favorites.length === 0) {
+      set({ recommendations: [] });
+      return;
+    }
+
+    // نجمع كل مكونات المفضلات
+    const favRecipes = favorites
+      .map(id => state.recipes.find(r => String(r.id) === String(id)))
+      .filter(Boolean);
+
+    const favIngredients = new Set(favRecipes.flatMap(r => r.ingredients.map(i => i.toLowerCase())));
+
+    // حساب درجة التشابه لكل وصفة غير موجودة في المفضلات
+    const scored = state.recipes
+      .filter(r => !favorites.includes(String(r.id))) // استبعاد المفضلات نفسها
+      .map(r => {
+        const common = r.ingredients.reduce((acc, ing) =>
+          acc + (favIngredients.has(ing.toLowerCase()) ? 1 : 0), 0);
+        return { recipe: r, score: common };
+      })
+      .filter(x => x.score > 0) // نريد تشابهًا فعليًا
+      .sort((a, b) => b.score - a.score || a.recipe.title.localeCompare(b.recipe.title))
+      .map(x => x.recipe);
+
+    // خذ أعلى N توصيات (مثلا 5)
+    set({ recommendations: scored.slice(0, 5) });
+  },
+
+  // عرض التوصيات كـ selector مفيد
+  getRecommendations: () => {
+    return get().recommendations;
   }
 }));
 
-// دالة مساعدة خارجية لحساب الفلترة (لا تعتمد على set/get داخلها مباشرة)
+// دالة فلترة مساعدة
 function _computeFiltered(state) {
   const term = (state.searchTerm || '').trim().toLowerCase();
   const ingredient = (state.ingredientFilter || '').trim().toLowerCase();

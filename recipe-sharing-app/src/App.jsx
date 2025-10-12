@@ -1,60 +1,53 @@
 // src/App.jsx
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useParams } from 'react-router-dom';
+import SearchBar from './components/SearchBar';
+import RecipeList from './components/RecipeList';
+import FavoritesList from './components/FavoritesList';
+import RecommendationsList from './components/RecommendationsList';
+import { useRecipeStore } from './recipeStore';
 
-import RecipeList from "./components/RecipeList";
-import AddRecipeForm from "./components/AddRecipeForm"; // ✅ المطلوب
-import FilterControls from "./components/FilterControls";
-import { useRecipeStore } from "./recipeStore";
-
-// صفحة تفاصيل الوصفة
-import { useParams } from "react-router-dom";
+// صفحة التفاصيل
 function RecipeDetail() {
   const { id } = useParams();
   const recipes = useRecipeStore(state => state.recipes);
-  const recipe = recipes.find(r => String(r.id) === id);
+  const recipe = recipes.find(r => String(r.id) === String(id));
 
   if (!recipe) return <h2>Recipe not found</h2>;
 
   return (
-    <div>
+    <div style={{ padding: 12 }}>
       <h2>{recipe.title}</h2>
-      <p><strong>Time:</strong> {recipe.time} mins</p>
-      <p><strong>Ingredients:</strong> {recipe.ingredients?.join(", ")}</p>
+      <p><strong>Prep time:</strong> {recipe.prepTime} min</p>
+      <p><strong>Ingredients:</strong> {recipe.ingredients.join(', ')}</p>
+      <p>{recipe.instructions}</p>
     </div>
   );
 }
 
-// الصفحة الرئيسية
 function Home() {
   return (
     <div>
       <h1>Recipe Sharing App</h1>
-      <FilterControls />
+      <SearchBar />
       <RecipeList />
     </div>
   );
 }
 
-// صفحة about
-function About() {
-  return <h2>About this app</h2>;
-}
-
 export default function App() {
   return (
     <Router>
-      <nav>
-        <Link to="/">Home</Link> |{" "}
-        <Link to="/add">Add Recipe</Link> |{" "}
-        <Link to="/about">About</Link>
+      <nav style={{ marginBottom: 12 }}>
+        <Link to="/">Home</Link> | <Link to="/favorites">Favorites</Link> | <Link to="/recommendations">Recommendations</Link>
       </nav>
 
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/add" element={<AddRecipeForm />} /> {/* ✅ المطلوب */}
-        <Route path="/about" element={<About />} />
         <Route path="/recipes/:id" element={<RecipeDetail />} />
+        <Route path="/favorites" element={<FavoritesList />} />
+        <Route path="/recommendations" element={<RecommendationsList />} />
+        {/* إذا عندك AddRecipeForm: <Route path="/add" element={<AddRecipeForm />} /> */}
       </Routes>
     </Router>
   );
