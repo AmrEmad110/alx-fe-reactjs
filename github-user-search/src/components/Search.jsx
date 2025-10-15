@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { fetchUserData, searchUsersAdvanced } from "../services/githubService";
-import UserCard from "./UserCard";
+import UserCard from "./UserCard.jsx";
 
 export default function Search() {
   const [username, setUsername] = useState("");
